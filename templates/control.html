@@ -1,0 +1,46 @@
+{% extends 'layout.html' %}
+
+{% block body %}
+<style>
+    #videoElement {
+        width: auto;
+        height: 2192px;
+        background-color: #666;
+    }
+</style>
+
+<p>YOO</p>
+<video autoplay="true" id="videoElement" controls></video>
+<input type="text" id="inputName">
+<button onclick="snapshot()">ClickMe</button>
+<canvas id="myCanvas" width="2921" height="2192"></canvas>
+
+<script>
+    var video = document.querySelector("#videoElement");
+    var name = document.getElementById("inputName");
+
+    init()
+    if (navigator.mediaDevices.getUserMedia) {
+        navigator.mediaDevices.getUserMedia({ video: true })
+            .then(function (stream) {
+            video.srcObject = stream;
+            })
+            .catch(function (err0r) {
+            console.log("Something went wrong!");
+            });
+    }
+
+    var canvas, ctx;
+
+    function init() {
+        canvas = document.querySelector("#myCanvas");
+        ctx = canvas.getContext('2d');
+    }
+
+    function snapshot() {
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+        var img = canvas.toDataURL("image/png");
+        document.write('<img src="'+img+'"/>');
+    }
+</script>
+{% endblock %}
