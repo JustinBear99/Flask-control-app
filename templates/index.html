@@ -10,9 +10,9 @@
 </style>
 
 <p>YOO</p>
-<video autoplay="true" id="videoElement" controls></video>
+<video autoplay="true" id="videoElement"></video>
 <input type="text" id="inputName">
-<button onclick="snapshot()">ClickMe</button>
+<input type="button" onclick="snapshot()" value="Click"></input>
 <canvas id="myCanvas" width="2921" height="2192"></canvas>
 
 <script>
@@ -40,7 +40,7 @@
     function snapshot() {
         ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
         var img = canvas.toDataURL("image/png");
-        document.write('<img src="'+img+'"/>');
+        console.log(img)
     }
 </script>
 {% endblock %}
