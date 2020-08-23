@@ -23,6 +23,8 @@ class Camera(BaseCamera):
 
         while True:
             # read current frame
+            camera.set(3, 2921)
+            camera.set(4, 2192) 
             _, img = camera.read()
 
             # encode as a jpeg image and return it
