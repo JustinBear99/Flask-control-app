@@ -10,11 +10,8 @@
 </style>
 
 <p>YOO</p>
-<video autoplay="true" id="videoElement"></video>
-<input type="text" id="inputName">
-<input type="button" onclick="snapshot()" value="Click"></input>
-<canvas id="myCanvas" width="2921" height="2192"></canvas>
-
+<img src="{{ url_for('video_feed') }}" alt="None">
+<!--
 <script>
     var video = document.querySelector("#videoElement");
     var name = document.getElementById("inputName");
@@ -43,4 +40,6 @@
         console.log(img)
     }
 </script>
+-->
+
 {% endblock %}
