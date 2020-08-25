@@ -22,6 +22,14 @@
     .form-container form #submit {
         grid-column: 2/3;
     }
+
+    .lidar-container {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        align-items: center;
+        justify-items: center;
+    }
+
     .move {
         padding: 5%;
     }
@@ -47,25 +55,28 @@
         <input type="text" name="Left" placeholder="Left name">
         <input type="text" name="Front" placeholder="Front name">
         <input type="text" name="Right" placeholder="Right name">
-        <input id="submit" type="submit" value="Click">
+        <input id="submit" type="submit" value="Save images">
     </form>
 </div>
 
-<!--
-  <div>
+<div class="lidar-container">
+    <img src="{{ lidar_png }}" alt="None">
     <img src="{{ url_for('lidar_feed') }}" alt="None">
-</div>  
--->
-
-
-
+    <form action="{{ url_for('lidar_save' )}}" method="post">
+        <input type="text" name="Lidar" placeholder="Lidar result file name">
+        <input id="submit" type="submit" value="Save result">
+    </form>
+</div>
 
 <div class="move">
-    <button>Forward</button>
-    <button>Backward</button>
-    <button>Right</button>
-    <button>Left</button>
+    <a href="/forward" class="btn btn-primary" role="button">Forward</a>
+    <a href="/backward" class="btn btn-primary" role="button">Backward</a>
+    <a href="/stop" class="btn btn-primary" role="button">Stop</a>
+    <a href="/turnRight" class="btn btn-primary" role="button">Turn right</a>
+    <a href="/turnLeft" class="btn btn-primary" role="button">Turn Left</a>
 </div>
+
+{% if cmd %}
 
 <!--
 <script>
