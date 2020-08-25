@@ -1,19 +1,71 @@
 {% extends 'layout.html' %}
 
 {% block body %}
+<style>
+    .videos{
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        text-align: center;
+    }
+    
+    .videos div {
+        padding: 5% 0%;
+    }
 
-<p>YOO</p>
-<img id="front" src="{{ url_for('video_feed') }}" alt="None" width="480" height="320">
-<div>
-    <form action="{{ url_for('captureframe') }}" method="post">
-        <input type="text" name="Name" placeholder="Name">
-        <input type="submit" value="Click">
+    .form-container  form {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        grid-gap: 1em;
+        text-align: center;
+        justify-items: center;
+    }
+    .form-container form #submit {
+        grid-column: 2/3;
+    }
+    .move {
+        padding: 5%;
+    }
+</style>
+
+<div class="videos">
+    <div>
+        <h1>Left</h1>
+        <img id="left" src="{{ url_for('video_feed_left') }}" alt="None" width="480" height="360">
+    </div>
+    <div>
+        <h1>Front</h1>
+        <img id="front" src="{{ url_for('video_feed_front') }}" alt="None" width="480" height="360">
+    </div>
+    <div>
+        <h1>Right</h1>
+        <img id="right" src="{{ url_for('video_feed_right') }}" alt="None" width="480" height="360">
+    </div>
+</div>
+
+<div class="form-container">
+    <form action="{{ url_for('capture') }}" method="post">
+        <input type="text" name="Left" placeholder="Left name">
+        <input type="text" name="Front" placeholder="Front name">
+        <input type="text" name="Right" placeholder="Right name">
+        <input id="submit" type="submit" value="Click">
     </form>
 </div>
-<p>{{ name }}</p>
+
+<!--
+  <div>
+    <img src="{{ url_for('lidar_feed') }}" alt="None">
+</div>  
+-->
 
 
 
+
+<div class="move">
+    <button>Forward</button>
+    <button>Backward</button>
+    <button>Right</button>
+    <button>Left</button>
+</div>
 
 <!--
 <script>

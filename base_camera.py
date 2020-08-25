@@ -41,7 +41,7 @@ class CameraEvent(object):
                 # did not process a previous frame
                 # if the event stays set for more than 5 seconds, then assume
                 # the client is gone and remove it
-                if now - event[1] > 5:
+                if now - event[1] > 1:
                     remove = ident
         if remove:
             del self.events[remove]
