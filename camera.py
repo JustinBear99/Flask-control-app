@@ -1,35 +1,40 @@
-import os
+from threading import Thread, Lock
 import cv2
-from base_camera import BaseCamera
 
 
-class Camera(BaseCamera):
+class CameraStream(object):
+    def __init__(self, src=0):
+        self.stream = cv2.VideoCapture(src)
 
-    def __init__(self, video_source):
-        
-        #if os.environ.get('OPENCV_CAMERA_SOURCE'):
-        #    Camera.set_video_source(int(os.environ['OPENCV_CAMERA_SOURCE']))
-        #else:
-        Camera.video_source = video_source
-        super(Camera, self).__init__()
+        (self.grabbed, self.frame) = self.stream.read()
+        self.started = False
+        self.read_lock = Lock()
 
-    #@staticmethod
-    #def set_video_source(source):
-    #    Camera.video_source = source
+    def start(self):
+        if self.started:
+            print("already started!!")
+            return None
+        self.started = True
+        self.thread = Thread(target=self.update, args=())
+        self.thread.start()
+        return self
 
-    @staticmethod
-    def frames():
-        camera = cv2.VideoCapture(Camera.video_source)
-        print(Camera.video_source)
-        print(camera)
-        if not camera.isOpened():
-            raise RuntimeError('Could not start camera.')
+    def update(self):
+        while self.started:
+            (grabbed, frame) = self.stream.read()
+            self.read_lock.acquire()
+            self.grabbed, self.frame = grabbed, frame
+            self.read_lock.release()
 
-        while True:
-            # read current frame
-            camera.set(3, 2921)
-            camera.set(4, 2192) 
-            _, img = camera.read()
+    def read(self):
+        self.read_lock.acquire()
+        frame = self.frame.copy()
+        self.read_lock.release()
+        return frame
 
-            # encode as a jpeg image and return it
-            yield cv2.imencode('.jpg', img)[1].tobytes()
+    def stop(self):
+        self.started = False
+        self.thread.join()
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        self.stream.release()

@@ -60,14 +60,13 @@
 </div>
 
 <div class="lidar-container">
-    <img src="{{ lidar_png }}" alt="None">
     <img src="{{ url_for('lidar_feed') }}" alt="None">
     <form action="{{ url_for('lidar_save' )}}" method="post">
         <input type="text" name="Lidar" placeholder="Lidar result file name">
         <input id="submit" type="submit" value="Save result">
     </form>
 </div>
-
+<!--
 <div class="move">
     <a href="/forward" class="btn btn-primary" role="button">Forward</a>
     <a href="/backward" class="btn btn-primary" role="button">Backward</a>
@@ -75,8 +74,10 @@
     <a href="/turnRight" class="btn btn-primary" role="button">Turn right</a>
     <a href="/turnLeft" class="btn btn-primary" role="button">Turn Left</a>
 </div>
+-->
 
-{% if cmd %}
+
+
 
 <!--
 <script>

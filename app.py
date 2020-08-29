@@ -1,64 +1,89 @@
 import os
 import io
 import cv2
+import time
 import base64
 import numpy as np
+import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
-import RPi.GPIO as gpio
+#import RPi.GPIO as gpio
 from importlib import import_module
 from flask import Flask, render_template, Response, request, send_file
-from flask_socketio import SocketIO
-from flask_cors import CORS
+from camera import CameraStream
+from multiprocessing import Pool
 from rplidar import RPLidar
 from PIL import Image
+import threading
 
 app = Flask(__name__)
+_pool = None
 app.config['DEBUG'] = True
 app.config['SECRET_KEY'] = 'secret!'
-lidar = RPLidar('/dev/ttyUSB1')
-
-gpio.setwarnings(False)
-gpio.setmode(gpio.BOARD)
-
+#gpio.setwarnings(False)
+#gpio.setmode(gpio.BOARD)
 
 @app.route('/')
-@app.route('/<cmd>')
+#@app.route('/<cmd>')
 def index():
 
     return render_template('index.html')
 
-def gen_frames(camera_id):
-    cap = cv2.VideoCapture(camera_id)  # capture the video from the live feed
-    namelist = ['front', 'left', 'right']
-    cap.set(3, 1920)
-    cap.set(4, 1080)
+def gen_frames_front():
+    cap_front = CameraStream(4).start()  # capture the video from the live feed
+    #cap.set(3, 1920)
+    #cap.set(4, 1080)
     while True:
-        success, frame = cap.read()  # read the camera frame
-        cv2.imwrite('{}.jpg'.format(namelist[int(camera_id/2)]), frame)
-        if not success:
-            break
-        else:
-            ret, buffer = cv2.imencode('.jpg', frame)
-            frame = buffer.tobytes()
-            yield (b'--frame\r\n'
-                   b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')  # concat frame one by one and show result
+        frame = cap_front.read()  # read the camera frame
+        cv2.imwrite('front.jpg', frame)
+        ret, buffer = cv2.imencode('.jpg', frame)
+        frame = buffer.tobytes()
+        yield (b'--frame\r\n'
+                b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')  # concat frame one by one and show result
 
+def gen_frames_right():
+    cap_right = CameraStream(6).start()  # capture the video from the live feed
+    #cap.set(3, 1920)
+    #cap.set(4, 1080)
+    while True:
+        frame = cap_right.read()  # read the camera frame
+        cv2.imwrite('right.jpg', frame)
+        ret, buffer = cv2.imencode('.jpg', frame)
+        frame = buffer.tobytes()
+        yield (b'--frame\r\n'
+                b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')  # concat frame one by one and show result
+
+def gen_frames_left():
+    cap_left = CameraStream(8).start()  # capture the video from the live feed
+    #cap.set(3, 1920)
+    #cap.set(4, 1080)
+    while True:
+        frame = cap_left.read()  # read the camera frame
+        cv2.imwrite('left.jpg', frame)
+        ret, buffer = cv2.imencode('.jpg', frame)
+        frame = buffer.tobytes()
+        yield (b'--frame\r\n'
+                b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')  # concat frame one by one and show result
 
 @app.route('/video_feed_front')
 def video_feed_front():
-    return Response(gen_frames(0),
+    #f = _pool.apply_async(gen_frames(4, 'front'))
+    #r = f.get(timeout=2)
+    return Response(gen_frames_front(),
                     mimetype='multipart/x-mixed-replace; boundary=frame')
 
 @app.route('/video_feed_right')
 def video_feed_right():
-    """Video streaming route. Put this in the src attribute of an img tag."""
-    return Response(gen_frames(4),
+    #f = _pool.apply_async(gen_frames(6, 'right'))
+    #r = f.get(timeout=2)
+    return Response(gen_frames_right(),
                     mimetype='multipart/x-mixed-replace; boundary=frame')
 
 @app.route('/video_feed_left')
 def video_feed_left():
-    """Video streaming route. Put this in the src attribute of an img tag."""
-    return Response(gen_frames(2),
+    #f = _pool.apply_async(gen_frames(8, 'left'))
+    #r = f.get(timeout=2)
+    return Response(gen_frames_left(),
                     mimetype='multipart/x-mixed-replace; boundary=frame')
 
 @app.route('/capture', methods=['POST'])
@@ -82,10 +107,11 @@ def fig_to_base64(fig):
     img.seek(0)
     return base64.b64encode(img.getvalue())
 
+
 def gen_lidar():
     while True:
-        lidar.clear_input()
-        for i, scan in enumerate(lidar.iter_scans(max_buf_meas=1000, min_len=0)):
+        lidar = RPLidar('/dev/ttyUSB1')
+        for i, scan in enumerate(lidar.iter_scans(max_buf_meas=100, min_len=0)):
             angle = []
             distance = []
             lidar_file = open('lidar_result.txt', 'w')
@@ -98,26 +124,26 @@ def gen_lidar():
                     distance.append(data[2])
                 lidar_file.writelines(str(data[0]) + ' ' + str(data[1]) + ' ' + str(data[2]) + '\n')
             lidar_file.close()
+        
             fig = plt.figure()
             ax = fig.add_subplot(111, projection='polar')
-            c = ax.scatter(angle, distance, s=10, cmap='grey', alpha=0.75, vmin=0, vmax=1000)
             ax.set_ylim([0, 1000])
+            ax.set_theta_zero_location('N')
+            ax.set_theta_direction(-1)
+            ax.scatter(angle, distance, s=10, cmap='grey', alpha=0.75, vmin=0, vmax=1000)
             plt.savefig('lidar.jpg')
             plt.close(fig)
             frame = cv2.imread('lidar.jpg')
             ret, buffer = cv2.imencode('.jpg', frame)
             frame = buffer.tobytes()
+            
             yield (b'--frame\r\n'
                     b'Content-Type: image/jpg\r\n\r\n' + frame + b'\r\n')
 
-@app.route('/lidar_png')
-def lidar_png():
-    img = Image.open('A1-pic-left.png')
-    
-    return render_template('index.html', lidar_png=img)
-
 @app.route('/lidar_feed')
 def lidar_feed():
+    #f = _pool.apply_async(gen_lidar())
+    #r = f.get(timeout=2)
     return Response(gen_lidar(), mimetype='multipart/x-mixed-replace; boundary=frame')
 
 @app.route('/lidar_save', methods=['POST'])
@@ -128,4 +154,10 @@ def lidar_save():
     return render_template('index.html')
 
 if __name__ == "__main__":
-    app.run(debug=True, host='192.168.50.23', port=5000)
+    #_pool = Pool(processes=4)
+    #try:
+    
+    app.run(debug=True, host='127.0.0.1', port=5000)
+    #except KeyboardInterrupt:
+        #_pool.close()
+        #_pool.join()
