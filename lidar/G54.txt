@@ -1,0 +1,4 @@
+Quality Angle(degree) Distance(mm)
+15 306.75 1457.0
+9 345.5 251.5
+9 347.65625 252.75

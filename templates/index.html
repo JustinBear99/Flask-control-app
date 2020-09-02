@@ -30,34 +30,7 @@
         justify-items: center;
     }
 
-    .move {
-        padding: 5%;
-    }
 </style>
-
-<div class="videos">
-    <div>
-        <h1>Left</h1>
-        <img id="left" src="{{ url_for('video_feed_left') }}" alt="None" width="480" height="360">
-    </div>
-    <div>
-        <h1>Front</h1>
-        <img id="front" src="{{ url_for('video_feed_front') }}" alt="None" width="480" height="360">
-    </div>
-    <div>
-        <h1>Right</h1>
-        <img id="right" src="{{ url_for('video_feed_right') }}" alt="None" width="480" height="360">
-    </div>
-</div>
-
-<div class="form-container">
-    <form action="{{ url_for('capture') }}" method="post">
-        <input type="text" name="Left" placeholder="Left name">
-        <input type="text" name="Front" placeholder="Front name">
-        <input type="text" name="Right" placeholder="Right name">
-        <input id="submit" type="submit" value="Save images">
-    </form>
-</div>
 
 <div class="lidar-container">
     <img src="{{ url_for('lidar_feed') }}" alt="None">
@@ -66,48 +39,5 @@
         <input id="submit" type="submit" value="Save result">
     </form>
 </div>
-<!--
-<div class="move">
-    <a href="/forward" class="btn btn-primary" role="button">Forward</a>
-    <a href="/backward" class="btn btn-primary" role="button">Backward</a>
-    <a href="/stop" class="btn btn-primary" role="button">Stop</a>
-    <a href="/turnRight" class="btn btn-primary" role="button">Turn right</a>
-    <a href="/turnLeft" class="btn btn-primary" role="button">Turn Left</a>
-</div>
--->
-
-
-
-
-<!--
-<script>
-    var video = document.querySelector("#videoElement");
-    var name = document.getElementById("inputName");
-
-    init()
-    if (navigator.mediaDevices.getUserMedia) {
-        navigator.mediaDevices.getUserMedia({ video: true })
-            .then(function (stream) {
-            video.srcObject = stream;
-            })
-            .catch(function (err0r) {
-            console.log("Something went wrong!");
-            });
-    }
-
-    var canvas, ctx;
-
-    function init() {
-        canvas = document.querySelector("#myCanvas");
-        ctx = canvas.getContext('2d');
-    }
-
-    function snapshot() {
-        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-        var img = canvas.toDataURL("image/png");
-        console.log(img)
-    }
-</script>
--->
 
 {% endblock %}
